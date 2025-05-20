@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.autoinsight.autoinsight_client.modules.vehicles.VehicleEntity;
+import br.com.autoinsight.autoinsight_client.modules.vehicles.dto.VehicleDTO;
+import br.com.autoinsight.autoinsight_client.modules.vehicles.mapper.VehicleMapper;
 import br.com.autoinsight.autoinsight_client.modules.vehicles.useCases.CreateVehicleUseCase;
 import br.com.autoinsight.autoinsight_client.modules.vehicles.useCases.DeleteVehicleUseCase;
 import br.com.autoinsight.autoinsight_client.modules.vehicles.useCases.UpdateVehicleUseCase;
@@ -42,26 +44,31 @@ public class VehicleController {
   private VehicleCachingUseCase vehicleCachingUseCase;
 
   @PostMapping("/")
-  public ResponseEntity<Object> create(@Valid @RequestBody VehicleEntity vehicleEntity) {
+  public ResponseEntity<Object> create(@Valid @RequestBody VehicleDTO vehicleDTO) {
     try {
-      var result = this.createVehicleUseCase.execute(vehicleEntity);
+      var entity = VehicleMapper.toEntity(vehicleDTO);
+      var result = this.createVehicleUseCase.execute(entity);
       vehicleCachingUseCase.clearCache();
-      return ResponseEntity.ok().body(result);
+      return ResponseEntity.ok().body(VehicleMapper.toDTO(result));
     } catch (Exception e) {
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
 
   @GetMapping("/")
-  public List<VehicleEntity> getAllVehicles() {
-    return vehicleCachingUseCase.findAll();
+  public List<VehicleDTO> getAllVehicles() {
+    return vehicleCachingUseCase.findAll()
+        .stream()
+        .map(VehicleMapper::toDTO)
+        .toList();
   }
 
   @GetMapping("/paged")
-  public Page<VehicleEntity> getPagedVehicles(@RequestParam(defaultValue = "0") int page,
+  public Page<VehicleDTO> getPagedVehicles(@RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "10") int size) {
     PageRequest pageable = PageRequest.of(page, size);
-    return vehicleCachingUseCase.findAll(pageable);
+    return vehicleCachingUseCase.findAll(pageable)
+        .map(VehicleMapper::toDTO);
   }
 
   @GetMapping("/{id}")
@@ -70,7 +77,7 @@ public class VehicleController {
     if (vehicle.isEmpty()) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Vehicle not found");
     }
-    return ResponseEntity.ok(vehicle.get());
+    return ResponseEntity.ok(VehicleMapper.toDTO(vehicle.get()));
   }
 
   @GetMapping("/user/{userId}")
@@ -79,32 +86,36 @@ public class VehicleController {
     if (vehicle.isEmpty()) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User vehicle not found!");
     }
-    return ResponseEntity.ok(vehicle);
+    return ResponseEntity.ok(VehicleMapper.toDTO(vehicle.get()));
   }
 
   @PutMapping("/{id}")
   public ResponseEntity<Object> updateVehicle(@PathVariable String id,
-      @Valid @RequestBody VehicleEntity vehicleEntity) {
-    Optional<VehicleEntity> existing = updateVehicleUseCase.findById(id);
-    if (existing.isEmpty()) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Vehicle not found");
-    }
-    VehicleEntity oldVehicle = existing.get();
+      @Valid @RequestBody VehicleDTO vehicleDTO) {
+    try {
+      Optional<VehicleEntity> existing = updateVehicleUseCase.findById(id);
+      if (existing.isEmpty()) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Vehicle not found");
+      }
+      VehicleEntity oldVehicle = existing.get();
 
-    if (vehicleEntity.getModelId() != null) {
-      oldVehicle.setModelId(vehicleEntity.getModelId());
-    }
-    if (vehicleEntity.getPlate() != null) {
-      oldVehicle.setPlate(vehicleEntity.getPlate());
-    }
-    if (vehicleEntity.getUserId() != null) {
-      oldVehicle.setUserId(vehicleEntity.getUserId());
-    }
+      if (vehicleDTO.getModelId() != null) {
+        oldVehicle.setModelId(vehicleDTO.getModelId());
+      }
+      if (vehicleDTO.getPlate() != null) {
+        oldVehicle.setPlate(vehicleDTO.getPlate());
+      }
+      if (vehicleDTO.getUserId() != null) {
+        oldVehicle.setUserId(vehicleDTO.getUserId());
+      }
 
-    updateVehicleUseCase.save(oldVehicle);
-    vehicleCachingUseCase.clearCache();
+      updateVehicleUseCase.save(oldVehicle);
+      vehicleCachingUseCase.clearCache();
 
-    return ResponseEntity.noContent().build();
+      return ResponseEntity.noContent().build();
+    } catch (Exception e) {
+      return ResponseEntity.badRequest().body(e.getMessage());
+    }
   }
 
   @DeleteMapping("/{id}")
