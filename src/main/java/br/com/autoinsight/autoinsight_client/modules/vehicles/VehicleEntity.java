@@ -1,6 +1,5 @@
 package br.com.autoinsight.autoinsight_client.modules.vehicles;
 
-import io.github.thibaultmeyer.cuid.CUID;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -27,8 +26,4 @@ public class VehicleEntity {
   @Pattern(regexp = "^[a-z0-9]{24}$", message = "Invalid CUID2 format")
   @Column(name = "user_id", nullable = false)
   private String userId;
-
-  public VehicleEntity() {
-    this.id = CUID.randomCUID2().toString();
-  }
 }
