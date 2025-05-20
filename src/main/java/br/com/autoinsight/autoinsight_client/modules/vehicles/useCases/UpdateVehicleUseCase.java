@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import br.com.autoinsight.autoinsight_client.exceptions.PlateFoundException;
 import br.com.autoinsight.autoinsight_client.modules.vehicles.VehicleEntity;
 import br.com.autoinsight.autoinsight_client.modules.vehicles.VehicleRepository;
 
@@ -19,6 +20,11 @@ public class UpdateVehicleUseCase {
   }
 
   public void save(VehicleEntity vehicleEntity) {
+    this.vehicleRepository
+        .findByPlate(vehicleEntity.getPlate())
+        .ifPresent((plate) -> {
+          throw new PlateFoundException();
+        });
     vehicleRepository.save(vehicleEntity);
   }
 }
