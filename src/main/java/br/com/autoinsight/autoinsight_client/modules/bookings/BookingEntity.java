@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import br.com.autoinsight.autoinsight_client.modules.vehicles.VehicleEntity;
-import io.github.thibaultmeyer.cuid.CUID;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -48,9 +47,4 @@ public class BookingEntity {
   @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
   @PastOrPresent(message = "Must be a past or present date")
   private LocalDateTime cancelledAt;
-
-  public BookingEntity() {
-    this.id = CUID.randomCUID2().toString();
-  }
-
 }
