@@ -20,6 +20,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.com.autoinsight.autoinsight_client.modules.bookings.BookingEntity;
+import br.com.autoinsight.autoinsight_client.modules.bookings.dto.BookingDTO;
+import br.com.autoinsight.autoinsight_client.modules.bookings.mapper.BookingMapper;
 import br.com.autoinsight.autoinsight_client.modules.bookings.useCases.BookingCachingUseCase;
 import br.com.autoinsight.autoinsight_client.modules.bookings.useCases.CreateBookingUseCase;
 import br.com.autoinsight.autoinsight_client.modules.bookings.useCases.DeleteBookingUseCase;
@@ -43,27 +45,32 @@ public class BookingController {
   private BookingCachingUseCase bookingCachingUseCase;
 
   @PostMapping("/")
-  public ResponseEntity<Object> create(@Valid @RequestBody BookingEntity bookingEntity) {
+  public ResponseEntity<Object> create(@Valid @RequestBody BookingDTO bookingDTO) {
     try {
-      var result = this.createBookingUseCase.execute(bookingEntity);
+      var entity = BookingMapper.toEntity(bookingDTO);
+      var result = this.createBookingUseCase.execute(entity);
       bookingCachingUseCase.clearCache();
-      return ResponseEntity.ok().body(result);
+      return ResponseEntity.ok().body(BookingMapper.toDTO(result));
     } catch (Exception e) {
       return ResponseEntity.badRequest().body(e.getMessage());
     }
   }
 
   @GetMapping("/")
-  public List<BookingEntity> getAllBookings() {
-    return bookingCachingUseCase.findAll();
+  public List<BookingDTO> getAllBookings() {
+    return bookingCachingUseCase.findAll()
+        .stream()
+        .map(BookingMapper::toDTO)
+        .toList();
   }
 
   @GetMapping("/paged")
-  public Page<BookingEntity> getPagedBookings(
+  public Page<BookingDTO> getPagedBookings(
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "10") int size) {
     PageRequest pageable = PageRequest.of(page, size, Sort.by("occursAt").descending());
-    return bookingCachingUseCase.findAll(pageable);
+    return bookingCachingUseCase.findAll(pageable)
+        .map(BookingMapper::toDTO);
   }
 
   @GetMapping("/{id}")
@@ -72,7 +79,7 @@ public class BookingController {
     if (booking.isEmpty()) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Booking not found");
     }
-    return ResponseEntity.ok(booking.get());
+    return ResponseEntity.ok(BookingMapper.toDTO(booking.get()));
   }
 
   @GetMapping("/yard/{yardId}")
@@ -81,7 +88,8 @@ public class BookingController {
     if (bookings.isEmpty()) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Yard bookings not found!");
     }
-    return ResponseEntity.ok(bookings);
+    List<BookingDTO> dtos = bookings.stream().map(BookingMapper::toDTO).toList();
+    return ResponseEntity.ok(dtos);
   }
 
   @GetMapping("vehicle/{vehicleId}")
@@ -90,29 +98,30 @@ public class BookingController {
     if (bookings.isEmpty()) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Vehicle bookings not found!");
     }
-    return ResponseEntity.ok(bookings);
+    List<BookingDTO> dtos = bookings.stream().map(BookingMapper::toDTO).toList();
+    return ResponseEntity.ok(dtos);
   }
 
   @PutMapping("/{id}")
   public ResponseEntity<Object> updateBooking(@PathVariable String id,
-      @Valid @RequestBody BookingEntity bookingEntity) {
+      @Valid @RequestBody BookingDTO bookingDTO) {
     Optional<BookingEntity> existing = updateBookingUseCase.findById(id);
     if (existing.isEmpty()) {
       return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Booking not found");
     }
     BookingEntity oldBooking = existing.get();
 
-    if (bookingEntity.getVehicleId() != null) {
-      oldBooking.setVehicleId(bookingEntity.getVehicleId());
+    if (bookingDTO.getVehicleId() != null) {
+      oldBooking.setVehicleId(bookingDTO.getVehicleId());
     }
-    if (bookingEntity.getYardId() != null) {
-      oldBooking.setYardId(bookingEntity.getYardId());
+    if (bookingDTO.getYardId() != null) {
+      oldBooking.setYardId(bookingDTO.getYardId());
     }
-    if (bookingEntity.getOccursAt() != null) {
-      oldBooking.setOccursAt(bookingEntity.getOccursAt());
+    if (bookingDTO.getOccursAt() != null) {
+      oldBooking.setOccursAt(bookingDTO.getOccursAt());
     }
-    if (bookingEntity.getCancelledAt() != null) {
-      oldBooking.setCancelledAt(bookingEntity.getCancelledAt());
+    if (bookingDTO.getCancelledAt() != null) {
+      oldBooking.setCancelledAt(bookingDTO.getCancelledAt());
     }
 
     updateBookingUseCase.save(oldBooking);
