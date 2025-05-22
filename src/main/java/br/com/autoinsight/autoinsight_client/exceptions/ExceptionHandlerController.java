@@ -3,6 +3,7 @@ package br.com.autoinsight.autoinsight_client.exceptions;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
@@ -11,12 +12,15 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import jakarta.persistence.EntityNotFoundException;
+
 @ControllerAdvice
 public class ExceptionHandlerController {
   
   private MessageSource messageSource;
 
-  private ExceptionHandlerController(MessageSource message) {
+  @Autowired
+  public ExceptionHandlerController(MessageSource message) {
     this.messageSource = message;
   }
 
@@ -34,4 +38,18 @@ public class ExceptionHandlerController {
     return new ResponseEntity<>(dto, HttpStatus.BAD_REQUEST);
   }
 
+  @ExceptionHandler({PlateFoundException.class, UserVehicleFoundException.class, BookingFoundException.class})
+  public ResponseEntity<String> handleCustomExceptions(RuntimeException e) {
+    return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(EntityNotFoundException.class)
+  public ResponseEntity<String> handleEntityNotFoundException(EntityNotFoundException e) {
+    return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+  }
+
+  @ExceptionHandler(Exception.class)
+  public ResponseEntity<String> handleGenericException(Exception e) {
+    return new ResponseEntity<>("Internal server error: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+  }
 }
