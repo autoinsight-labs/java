@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import br.com.autoinsight.autoinsight_client.modules.bookings.BookingEntity;
@@ -19,9 +19,9 @@ public class BookingCachingUseCase {
   @Autowired
   private BookingRepository bookingRepository;
 
-  @Cacheable(value = "findAllBookings")
-  public List<BookingEntity> findAll() {
-    return bookingRepository.findAll();
+  @Cacheable(value = "findAllBookingsPaged", key = "#pageable")
+  public Page<BookingEntity> findAll(Pageable pageable) {
+    return bookingRepository.findAll(pageable);
   }
 
   @Cacheable(value = "findBookingById", key = "#id")
@@ -29,22 +29,22 @@ public class BookingCachingUseCase {
     return bookingRepository.findById(id);
   }
 
-  @Cacheable(value =  "findByYardId", key = "#yardId")
-  public List<BookingEntity> findByYardId(String yardId) {
-    return bookingRepository.findByYardId(yardId);
+  @Cacheable(value = "findByYardIdPaged", key = "#yardId + '_' + #pageable")
+  public Page<BookingEntity> findByYardId(String yardId, Pageable pageable) {
+    return bookingRepository.findByYardId(yardId, pageable);
   }
 
-  @Cacheable(value = "findByVehicleId", key = "#vehicleId")
-  public List<BookingEntity> findByVehicleId(String vehicleId) {
-    return bookingRepository.findByVehicleId(vehicleId);
+  @Cacheable(value = "findByVehicleIdPaged", key = "#vehicleId + '_' + #pageable")
+  public Page<BookingEntity> findByVehicleId(String vehicleId, Pageable pageable) {
+    return bookingRepository.findByVehicleId(vehicleId, pageable);
   }
 
-  @Cacheable(value = "findAllBookingsPaged", key = "#req")
-  public Page<BookingEntity> findAll(PageRequest req) {
-    return bookingRepository.findAll(req);
-  }
-
-  @CacheEvict(value = { "findAllBookings", "findBookingById", "findByYardId", "findByVehicleId", "findAllBookingsPaged" }, allEntries = true)
+  @CacheEvict(value = { 
+    "findAllBookingsPaged",
+    "findBookingById", 
+    "findByYardIdPaged",
+    "findByVehicleIdPaged" 
+  }, allEntries = true)
   public void clearCache() {
     System.out.println("Clearing booking cache!");
   }

@@ -1,11 +1,11 @@
 package br.com.autoinsight.autoinsight_client.modules.bookings.controllers;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -57,18 +57,10 @@ public class BookingController {
   }
 
   @GetMapping("/")
-  public List<BookingDTO> getAllBookings() {
-    return bookingCachingUseCase.findAll()
-        .stream()
-        .map(BookingMapper::toDTO)
-        .toList();
-  }
-
-  @GetMapping("/paged")
-  public Page<BookingDTO> getPagedBookings(
+  public Page<BookingDTO> getAllBookings(
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "10") int size) {
-    PageRequest pageable = PageRequest.of(page, size, Sort.by("occursAt").descending());
+    Pageable pageable = PageRequest.of(page, size, Sort.by("occursAt").descending());
     return bookingCachingUseCase.findAll(pageable)
         .map(BookingMapper::toDTO);
   }
@@ -83,23 +75,23 @@ public class BookingController {
   }
 
   @GetMapping("/yard/{yardId}")
-  public ResponseEntity<Object> getBookingsByYardId(@PathVariable String yardId) {
-    List<BookingEntity> bookings = bookingCachingUseCase.findByYardId(yardId);
-    if (bookings.isEmpty()) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Yard bookings not found!");
-    }
-    List<BookingDTO> dtos = bookings.stream().map(BookingMapper::toDTO).toList();
-    return ResponseEntity.ok(dtos);
+  public Page<BookingDTO> getBookingsByYardId(
+      @PathVariable String yardId,
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "10") int size) {
+    Pageable pageable = PageRequest.of(page, size, Sort.by("occursAt").descending());
+    return bookingCachingUseCase.findByYardId(yardId, pageable)
+        .map(BookingMapper::toDTO);
   }
 
   @GetMapping("vehicle/{vehicleId}")
-  public ResponseEntity<Object> getBookingsByVehicleId(@PathVariable String vehicleId) {
-    List<BookingEntity> bookings = bookingCachingUseCase.findByVehicleId(vehicleId);
-    if (bookings.isEmpty()) {
-      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Vehicle bookings not found!");
-    }
-    List<BookingDTO> dtos = bookings.stream().map(BookingMapper::toDTO).toList();
-    return ResponseEntity.ok(dtos);
+  public Page<BookingDTO> getBookingsByVehicleId(
+      @PathVariable String vehicleId,
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "10") int size) {
+    Pageable pageable = PageRequest.of(page, size, Sort.by("occursAt").descending());
+    return bookingCachingUseCase.findByVehicleId(vehicleId, pageable)
+        .map(BookingMapper::toDTO);
   }
 
   @PutMapping("/{id}")

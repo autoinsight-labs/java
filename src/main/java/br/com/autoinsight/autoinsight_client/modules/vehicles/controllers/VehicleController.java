@@ -1,11 +1,11 @@
 package br.com.autoinsight.autoinsight_client.modules.vehicles.controllers;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -56,17 +56,10 @@ public class VehicleController {
   }
 
   @GetMapping("/")
-  public List<VehicleDTO> getAllVehicles() {
-    return vehicleCachingUseCase.findAll()
-        .stream()
-        .map(VehicleMapper::toDTO)
-        .toList();
-  }
-
-  @GetMapping("/paged")
-  public Page<VehicleDTO> getPagedVehicles(@RequestParam(defaultValue = "0") int page,
+  public Page<VehicleDTO> getAllVehicles(
+      @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "10") int size) {
-    PageRequest pageable = PageRequest.of(page, size);
+    Pageable pageable = PageRequest.of(page, size);
     return vehicleCachingUseCase.findAll(pageable)
         .map(VehicleMapper::toDTO);
   }
