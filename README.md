@@ -2,7 +2,7 @@
 
 ## 🚀 Sobre o Projeto
 
-A **AutoInsight API** é uma API RESTful desenvolvida em Spring Boot para gestão inteligente de veículos e reservas de motocicletas. A API fornece endpoints completos para gerenciamento de veículos, reservas (bookings) e suas relações, com integração ao banco de dados Oracle, sistema de cache e validações robustas.
+A **AutoInsight API** é uma API RESTful desenvolvida em Spring Boot para gestão inteligente de veículos e reservas de motocicletas. A API fornece endpoints completos para gerenciamento de veículos, reservas (bookings) e suas relações, com integração ao banco de dados Oracle, sistema de cache, validações robustas e paginação em todas as consultas de listagem.
 
 ## 👥 Equipe de Desenvolvimento
 
@@ -23,6 +23,7 @@ A **AutoInsight API** é uma API RESTful desenvolvida em Spring Boot para gestã
 - **Lombok 1.18.38** - Redução de boilerplate code
 - **Bean Validation (Jakarta)** - Validação de campos
 - **Spring Cache** - Sistema de cache
+- **Spring Data Pagination** - Sistema de paginação automática
 
 ### Dependências Adicionais
 - **CUID 2.0.3** - Geração de IDs únicos
@@ -34,6 +35,7 @@ A **AutoInsight API** é uma API RESTful desenvolvida em Spring Boot para gestã
 - **Repository Pattern** - Abstração de acesso a dados
 - **DTOs** - Transferência de dados
 - **Exception Handler** - Tratamento centralizado de erros
+- **Paginação Uniforme** - Todas as consultas de listagem utilizam paginação
 
 ## 🗄️ Estrutura do Banco de Dados
 
@@ -102,10 +104,9 @@ O projeto utiliza Spring Data JPA com Oracle Database e inclui as seguintes enti
 
 | Método | Endpoint | Descrição | Parâmetros | Retorno |
 |--------|----------|-----------|------------|---------|
-| GET | `/vehicles/` | Lista todos os veículos | - | 200 OK |
-| GET | `/vehicles/paged` | Lista veículos com paginação | `page`, `size` | 200 OK |
-| GET | `/vehicles/{id}` | Busca veículo por ID | `id` (path) | 200 OK, 404 NotFound |
-| GET | `/vehicles/user/{userId}` | Busca veículo por usuário | `userId` (path) | 200 OK, 404 NotFound |
+| GET | `/vehicles/` | Lista todos os veículos **com paginação** | `page` (padrão: 0), `size` (padrão: 10) | 200 OK - `Page<VehicleDTO>` |
+| GET | `/vehicles/{id}` | Busca veículo por ID | `id` (path) | 200 OK - `VehicleDTO`, 404 NotFound |
+| GET | `/vehicles/user/{userId}` | Busca veículo por usuário | `userId` (path) | 200 OK - `VehicleDTO`, 404 NotFound |
 | POST | `/vehicles/` | Cria novo veículo | Body: `VehicleDTO` | 200 OK, 400 BadRequest |
 | PUT | `/vehicles/{id}` | Atualiza veículo | `id` (path), Body: `VehicleDTO` | 204 NoContent, 404 NotFound |
 | DELETE | `/vehicles/{id}` | Remove veículo | `id` (path) | 204 NoContent, 404 NotFound |
@@ -114,14 +115,59 @@ O projeto utiliza Spring Data JPA com Oracle Database e inclui as seguintes enti
 
 | Método | Endpoint | Descrição | Parâmetros | Retorno |
 |--------|----------|-----------|------------|---------|
-| GET | `/bookings/` | Lista todas as reservas | - | 200 OK |
-| GET | `/bookings/paged` | Lista reservas com paginação | `page`, `size` | 200 OK |
-| GET | `/bookings/{id}` | Busca reserva por ID | `id` (path) | 200 OK, 404 NotFound |
-| GET | `/bookings/yard/{yardId}` | Busca reservas por pátio | `yardId` (path) | 200 OK, 404 NotFound |
-| GET | `/bookings/vehicle/{vehicleId}` | Busca reservas por veículo | `vehicleId` (path) | 200 OK, 404 NotFound |
+| GET | `/bookings/` | Lista todas as reservas **com paginação** | `page` (padrão: 0), `size` (padrão: 10) | 200 OK - `Page<BookingDTO>` |
+| GET | `/bookings/{id}` | Busca reserva por ID | `id` (path) | 200 OK - `BookingDTO`, 404 NotFound |
+| GET | `/bookings/yard/{yardId}` | Busca reservas por pátio **com paginação** | `yardId` (path), `page`, `size` | 200 OK - `Page<BookingDTO>` |
+| GET | `/bookings/vehicle/{vehicleId}` | Busca reservas por veículo **com paginação** | `vehicleId` (path), `page`, `size` | 200 OK - `Page<BookingDTO>` |
 | POST | `/bookings/` | Cria nova reserva | Body: `BookingDTO` | 200 OK, 400 BadRequest |
 | PUT | `/bookings/{id}` | Atualiza reserva | `id` (path), Body: `BookingDTO` | 204 NoContent, 404 NotFound |
 | DELETE | `/bookings/{id}` | Remove reserva | `id` (path) | 204 NoContent, 404 NotFound |
+
+### 📄 Estrutura de Resposta Paginada
+
+Todas as rotas que retornam listas agora utilizam o formato padrão do Spring Data:
+
+```json
+{
+  "content": [
+    // Array com os itens da página atual
+  ],
+  "pageable": {
+    "sort": {
+      "sorted": true,
+      "unsorted": false
+    },
+    "pageNumber": 0,
+    "pageSize": 10,
+    "offset": 0,
+    "paged": true,
+    "unpaged": false
+  },
+  "totalElements": 100,
+  "totalPages": 10,
+  "last": false,
+  "first": true,
+  "numberOfElements": 10,
+  "size": 10,
+  "number": 0,
+  "sort": {
+    "sorted": true,
+    "unsorted": false
+  }
+}
+```
+
+### 🔄 Parâmetros de Paginação
+
+Todos os endpoints de listagem aceitam os seguintes parâmetros de query:
+
+- **`page`** (int): Número da página (base 0) - Padrão: `0`
+- **`size`** (int): Tamanho da página - Padrão: `10`
+
+### 📊 Ordenação Automática
+
+- **Bookings**: Todas as consultas são automaticamente ordenadas por `occursAt` em ordem **decrescente** (mais recentes primeiro)
+- **Vehicles**: Ordenação padrão do banco de dados
 
 ## 📊 Exemplos de Uso
 
@@ -149,12 +195,28 @@ curl -X POST http://localhost:8080/bookings/ \
 
 ### Listar Veículos com Paginação
 ```bash
-curl "http://localhost:8080/vehicles/paged?page=0&size=5"
+# Primeira página com 10 itens
+curl "http://localhost:8080/vehicles/?page=0&size=10"
+
+# Segunda página com 5 itens
+curl "http://localhost:8080/vehicles/?page=1&size=5"
 ```
 
-### Buscar Reservas por Pátio
+### Listar Reservas com Paginação (ordenadas por data)
 ```bash
-curl "http://localhost:8080/bookings/yard/yard123456789012345678"
+# Primeira página - reservas mais recentes primeiro
+curl "http://localhost:8080/bookings/?page=0&size=10"
+
+# Buscar reservas por pátio com paginação
+curl "http://localhost:8080/bookings/yard/yard123456789012345678?page=0&size=5"
+
+# Buscar reservas por veículo com paginação
+curl "http://localhost:8080/bookings/vehicle/vehicle123456789012345678?page=0&size=3"
+```
+
+### Buscar um Veículo Específico (sem paginação)
+```bash
+curl "http://localhost:8080/vehicles/vehicle123456789012345678"
 ```
 
 ## 🎯 Funcionalidades de Negócio
@@ -180,6 +242,14 @@ curl "http://localhost:8080/bookings/yard/yard123456789012345678"
 - Cache em memória para otimizar consultas frequentes
 - Invalidação automática em operações de escrita
 - Caches separados por tipo de consulta para maior eficiência
+- **Cache paginado**: Otimização específica para consultas paginadas
+
+### 📄 Sistema de Paginação
+- **Paginação Universal**: Todas as rotas de listagem utilizam paginação automaticamente
+- **Ordenação Inteligente**: Bookings ordenadas por data de ocorrência (decrescente)
+- **Performance Otimizada**: Consultas limitadas para melhor performance
+- **Flexibilidade**: Parâmetros configuráveis de página e tamanho
+- **Compatibilidade**: Endpoints únicos que retornam dados paginados
 
 ## 🔧 Tratamento de Erros
 
