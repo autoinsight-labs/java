@@ -1,6 +1,5 @@
 package br.com.autoinsight.autoinsight_client.modules.vehicles.useCases;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,10 +33,10 @@ public class VehicleCachingUseCase {
         return vehicleRepository.findByUserId(userId);
     }
 
-    @CacheEvict(value = { 
-        "findAllVehiclesPaged",
-        "findVehicleById", 
-        "findVehicleByUserId"
+    @CacheEvict(value = {
+            "findAllVehiclesPaged",
+            "findVehicleById",
+            "findVehicleByUserId"
     }, allEntries = true)
     public void clearCache() {
         System.out.println("Clearing vehicle cache!");

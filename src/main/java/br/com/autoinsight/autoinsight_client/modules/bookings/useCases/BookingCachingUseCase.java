@@ -1,6 +1,5 @@
 package br.com.autoinsight.autoinsight_client.modules.bookings.useCases;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,11 +38,11 @@ public class BookingCachingUseCase {
     return bookingRepository.findByVehicleId(vehicleId, pageable);
   }
 
-  @CacheEvict(value = { 
-    "findAllBookingsPaged",
-    "findBookingById", 
-    "findByYardIdPaged",
-    "findByVehicleIdPaged" 
+  @CacheEvict(value = {
+      "findAllBookingsPaged",
+      "findBookingById",
+      "findByYardIdPaged",
+      "findByVehicleIdPaged"
   }, allEntries = true)
   public void clearCache() {
     System.out.println("Clearing booking cache!");
