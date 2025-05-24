@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import br.com.autoinsight.autoinsight_client.modules.vehicles.VehicleEntity;
@@ -19,9 +19,9 @@ public class VehicleCachingUseCase {
     @Autowired
     private VehicleRepository vehicleRepository;
 
-    @Cacheable(value = "findAllVehicles")
-    public List<VehicleEntity> findAll() {
-        return vehicleRepository.findAll();
+    @Cacheable(value = "findAllVehiclesPaged", key = "#pageable")
+    public Page<VehicleEntity> findAll(Pageable pageable) {
+        return vehicleRepository.findAll(pageable);
     }
 
     @Cacheable(value = "findVehicleById", key = "#id")
@@ -34,12 +34,11 @@ public class VehicleCachingUseCase {
         return vehicleRepository.findByUserId(userId);
     }
 
-    @Cacheable(value = "findAllVehiclesPaged", key = "#req")
-    public Page<VehicleEntity> findAll(PageRequest req) {
-        return vehicleRepository.findAll(req);
-    }
-
-    @CacheEvict(value = { "findAllVehicles", "findVehicleById", "findVehicleByUserId", "findAllVehiclesPaged" }, allEntries = true)
+    @CacheEvict(value = { 
+        "findAllVehiclesPaged",
+        "findVehicleById", 
+        "findVehicleByUserId"
+    }, allEntries = true)
     public void clearCache() {
         System.out.println("Clearing vehicle cache!");
     }

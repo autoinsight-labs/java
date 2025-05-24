@@ -9,7 +9,9 @@ import org.springframework.cache.annotation.EnableCaching;
 public class AutoinsightClientApplication {
 
 	public static void main(String[] args) {
+		System.out.println("Starting AutoInsight Client Application...");
 		SpringApplication.run(AutoinsightClientApplication.class, args);
+		System.out.println("Application started successfully!");
 	}
 
 }

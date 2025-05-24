@@ -9,8 +9,9 @@ WORKDIR /app
 COPY --from=build /app/target/autoinsight_client-0.0.1-SNAPSHOT.jar app.jar
 
 COPY src/main/resources/application.properties ./application.properties
-COPY .env ./.env
 
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-XX:+UseContainerSupport", "-XX:MaxRAMPercentage=75.0", "-Djava.security.egd=file:/dev/./urandom", "-jar", "app.jar"]
+
+STOPSIGNAL SIGTERM
