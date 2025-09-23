@@ -25,4 +25,8 @@ public class CreateUserRequestDTO {
   @Size(min = 6, max = 50, message = "Password must be between 6 and 50 characters")
   @Schema(description = "Senha segura com pelo menos 6 caracteres", example = "minhasenha123")
   private String password;
+
+  @Size(min = 24, max = 24, message = "RoleId must be 24 characters (CUID2)")
+  @Schema(description = "ID da role associada ao usuário. Se omitido, usa a role padrão.", example = "2345656789abcdef01234567")
+  private String roleId;
 }

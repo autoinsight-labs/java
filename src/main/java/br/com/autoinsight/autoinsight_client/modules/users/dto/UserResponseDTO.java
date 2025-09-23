@@ -14,4 +14,7 @@ public class UserResponseDTO {
 
   @Schema(description = "Email do usuário", example = "joao.silva@empresa.com")
   private String email;
+
+  @Schema(description = "ID da role associada", example = "cmabcdef1234567890abcdef")
+  private String roleId;
 }

@@ -16,4 +16,7 @@ public class UpdateUserRequestDTO {
 
   @Size(min = 6, max = 50, message = "Password must be between 6 and 50 characters")
   private String password;
+
+  @Size(min = 24, max = 24, message = "RoleId must be 24 characters (CUID2)")
+  private String roleId;
 }
