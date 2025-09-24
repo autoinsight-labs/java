@@ -30,6 +30,14 @@ public class JwtService {
     return extractClaim(token, Claims::getSubject);
   }
 
+  public String extractRoleAcronym(String token) {
+    return extractClaim(token, claims -> claims.get("role", String.class));
+  }
+
+  public String extractRoleId(String token) {
+    return extractClaim(token, claims -> claims.get("roleId", String.class));
+  }
+
   public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
     final Claims claims = extractAllClaims(token);
     return claimsResolver.apply(claims);
@@ -41,6 +49,10 @@ public class JwtService {
     if (userDetails instanceof UsersEntity) {
       UsersEntity user = (UsersEntity) userDetails;
       extraClaims.put("userId", user.getId());
+      if (user.getRole() != null) {
+        extraClaims.put("roleId", user.getRole().getId());
+        extraClaims.put("role", user.getRole().getAcronym());
+      }
     }
 
     return generateToken(extraClaims, userDetails);
@@ -64,6 +76,15 @@ public class JwtService {
   public boolean isTokenValid(String token, UserDetails userDetails) {
     final String username = extractUsername(token);
     return (username.equals(userDetails.getUsername())) && !isTokenExpired(token);
+  }
+
+  public boolean isTokenSignatureValid(String token) {
+    try {
+      extractAllClaims(token);
+      return !isTokenExpired(token);
+    } catch (Exception e) {
+      return false;
+    }
   }
 
   private boolean isTokenExpired(String token) {

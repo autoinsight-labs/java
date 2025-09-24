@@ -5,9 +5,8 @@ import java.io.IOException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -24,9 +23,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   @Autowired
   private JwtService jwtService;
 
-  @Autowired
-  private UserDetailsService userDetailsService;
-
   @Override
   protected void doFilterInternal(
       @NonNull HttpServletRequest request,
@@ -36,6 +32,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     final String authHeader = request.getHeader("Authorization");
     final String jwt;
     final String userEmail;
+    final String roleAcronym;
 
     if (authHeader == null || !authHeader.startsWith("Bearer ")) {
       filterChain.doFilter(request, response);
@@ -44,21 +41,26 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     jwt = authHeader.substring(7);
     userEmail = jwtService.extractUsername(jwt);
+    roleAcronym = jwtService.extractRoleAcronym(jwt);
 
     if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-      UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+      boolean valid = jwtService.isTokenSignatureValid(jwt);
 
-      if (jwtService.isTokenValid(jwt, userDetails)) {
+      if (valid) {
+        java.util.List<org.springframework.security.core.GrantedAuthority> authorities = new java.util.ArrayList<>();
+        if (roleAcronym != null && !roleAcronym.isBlank()) {
+          authorities.add(new SimpleGrantedAuthority("ROLE_" + roleAcronym.toUpperCase()));
+        }
         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-            userDetails,
+            userEmail,
             null,
-            userDetails.getAuthorities());
+            authorities);
         authToken.setDetails(
             new WebAuthenticationDetailsSource().buildDetails(request));
         SecurityContextHolder.getContext().setAuthentication(authToken);
       }
     }
-    
+
     filterChain.doFilter(request, response);
   }
-} 
+}

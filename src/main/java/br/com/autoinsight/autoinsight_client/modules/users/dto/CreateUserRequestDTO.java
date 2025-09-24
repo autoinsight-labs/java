@@ -1,5 +1,7 @@
 package br.com.autoinsight.autoinsight_client.modules.users.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -28,5 +30,6 @@ public class CreateUserRequestDTO {
 
   @Size(min = 24, max = 24, message = "RoleId must be 24 characters (CUID2)")
   @Schema(description = "ID da role associada ao usuário. Se omitido, usa a role padrão.", example = "2345656789abcdef01234567")
+  @JsonProperty("role_id")
   private String roleId;
 }
