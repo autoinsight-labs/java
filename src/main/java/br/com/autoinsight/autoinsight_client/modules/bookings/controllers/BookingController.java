@@ -44,7 +44,7 @@ public class BookingController {
   @Autowired
   private BookingCachingUseCase bookingCachingUseCase;
 
-  @PostMapping("/")
+  @PostMapping
   public ResponseEntity<Object> create(@Valid @RequestBody BookingDTO bookingDTO) {
     try {
       var entity = BookingMapper.toEntity(bookingDTO);
@@ -56,7 +56,7 @@ public class BookingController {
     }
   }
 
-  @GetMapping("/")
+  @GetMapping
   public Page<BookingDTO> getAllBookings(
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "10") int size) {
@@ -84,7 +84,7 @@ public class BookingController {
         .map(BookingMapper::toDTO);
   }
 
-  @GetMapping("vehicle/{vehicleId}")
+  @GetMapping("/vehicle/{vehicleId}")
   public Page<BookingDTO> getBookingsByVehicleId(
       @PathVariable String vehicleId,
       @RequestParam(defaultValue = "0") int page,

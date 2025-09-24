@@ -43,7 +43,7 @@ public class VehicleController {
   @Autowired
   private VehicleCachingUseCase vehicleCachingUseCase;
 
-  @PostMapping("/")
+  @PostMapping
   public ResponseEntity<Object> create(@Valid @RequestBody VehicleDTO vehicleDTO) {
     try {
       var entity = VehicleMapper.toEntity(vehicleDTO);
@@ -55,7 +55,7 @@ public class VehicleController {
     }
   }
 
-  @GetMapping("/")
+  @GetMapping
   public Page<VehicleDTO> getAllVehicles(
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "10") int size) {
