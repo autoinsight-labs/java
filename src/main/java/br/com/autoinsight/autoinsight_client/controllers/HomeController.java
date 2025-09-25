@@ -30,25 +30,20 @@ public class HomeController {
   @GetMapping("/")
   public String home(Model model) {
     try {
-      // Contar usuários
       Pageable pageable = PageRequest.of(0, 1);
       long userCount = getAllUsersUseCase.execute(pageable).getTotalElements();
       model.addAttribute("userCount", userCount);
 
-      // Contar veículos
       long vehicleCount = vehicleCachingUseCase.findAll(pageable).getTotalElements();
       model.addAttribute("vehicleCount", vehicleCount);
 
-      // Contar reservas
       long bookingCount = bookingCachingUseCase.findAll(pageable).getTotalElements();
       model.addAttribute("bookingCount", bookingCount);
 
-      // Contar roles
       long roleCount = roleCachingUseCase.findAll(pageable).getTotalElements();
       model.addAttribute("roleCount", roleCount);
 
     } catch (Exception e) {
-      // Em caso de erro, definir contadores como 0
       model.addAttribute("userCount", 0);
       model.addAttribute("vehicleCount", 0);
       model.addAttribute("bookingCount", 0);

@@ -13,26 +13,21 @@
         <div class="row h-100">
             <div class="col-12 d-flex align-items-center justify-content-center">
                 <div class="text-center">
-                    <!-- Error Icon -->
                     <div class="mb-4">
                         <i class="fas fa-exclamation-circle fa-5x text-warning"></i>
                     </div>
                     
-                    <!-- Error Title -->
                     <h2 class="mb-3">Algo deu errado</h2>
                     
-                    <!-- Error Message -->
                     <p class="lead text-muted mb-4">
                         <span th:text="${error ?: 'Ocorreu um erro inesperado'}">Ocorreu um erro inesperado</span>
                     </p>
                     
-                    <!-- Additional Info -->
                     <div class="alert alert-info d-inline-block" role="alert">
                         <i class="fas fa-info-circle me-2"></i>
                         <strong>Dica:</strong> Tente recarregar a página ou volte mais tarde.
                     </div>
                     
-                    <!-- Action Buttons -->
                     <div class="mt-4">
                         <a th:href="@{/}" class="btn btn-primary me-3">
                             <i class="fas fa-home me-2"></i>Página Inicial

@@ -11,8 +11,7 @@
 <body>
     <div th:replace="~{fragments/header :: header}"></div>
     
-    <main class="container my-4">
-        <!-- Mensagens de sucesso/erro -->
+    <main class="container my-4">   
         <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
             <i class="fas fa-check-circle me-2"></i>
             <span th:text="${successMessage}"></span>

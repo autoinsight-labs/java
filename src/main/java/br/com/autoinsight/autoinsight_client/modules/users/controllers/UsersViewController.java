@@ -51,7 +51,7 @@ public class UsersViewController {
     ModelAndView modelAndView = new ModelAndView("users/list");
 
     try {
-      Pageable pageable = PageRequest.of(0, 100); // Buscar até 100 usuários
+      Pageable pageable = PageRequest.of(0, 100);
       var usersPage = getAllUsersUseCase.execute(pageable);
       modelAndView.addObject("users", usersPage.getContent());
     } catch (Exception e) {

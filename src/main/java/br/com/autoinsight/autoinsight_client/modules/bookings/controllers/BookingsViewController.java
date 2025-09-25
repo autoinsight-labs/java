@@ -119,7 +119,6 @@ public class BookingsViewController {
           return "bookings/edit";
         }
       } catch (Exception e) {
-        // ignore and fallthrough to not found
       }
       redirectAttributes.addFlashAttribute("errorMessage", "Reserva não encontrada");
       return "redirect:/view/bookings";

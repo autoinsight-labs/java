@@ -121,7 +121,6 @@ public class RoleViewController {
           return "roles/edit";
         }
       } catch (Exception e) {
-        // Ignore
       }
       redirectAttributes.addFlashAttribute("errorMessage", "Role não encontrada");
       return "redirect:/view/roles";

@@ -48,7 +48,7 @@ public class VehicleViewController {
     ModelAndView modelAndView = new ModelAndView("vehicles/list");
 
     try {
-      Pageable pageable = PageRequest.of(0, 100); // Buscar até 100 veículos
+      Pageable pageable = PageRequest.of(0, 100);
       var vehiclesPage = vehicleCachingUseCase.findAll(pageable);
       modelAndView.addObject("vehicles", vehiclesPage.getContent().stream()
           .map(VehicleMapper::toDTO)
@@ -123,7 +123,6 @@ public class VehicleViewController {
           return "vehicles/edit";
         }
       } catch (Exception e) {
-        // Ignore
       }
       redirectAttributes.addFlashAttribute("errorMessage", "Veículo não encontrado");
       return "redirect:/view/vehicles";
