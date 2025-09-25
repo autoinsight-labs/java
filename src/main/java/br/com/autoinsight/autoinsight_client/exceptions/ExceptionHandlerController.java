@@ -11,12 +11,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import jakarta.persistence.EntityNotFoundException;
 
 @ControllerAdvice
 public class ExceptionHandlerController {
-  
+
   private MessageSource messageSource;
 
   @Autowired
@@ -25,9 +26,10 @@ public class ExceptionHandlerController {
   }
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
-  public ResponseEntity<List<ErrorMessageDTO>> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+  public ResponseEntity<List<ErrorMessageDTO>> handleMethodArgumentNotValidException(
+      MethodArgumentNotValidException e) {
     List<ErrorMessageDTO> dto = new ArrayList<>();
-    
+
     e.getBindingResult().getFieldErrors().forEach(err -> {
       String message = messageSource.getMessage(err, LocaleContextHolder.getLocale());
 
@@ -38,13 +40,18 @@ public class ExceptionHandlerController {
     return new ResponseEntity<>(dto, HttpStatus.BAD_REQUEST);
   }
 
-  @ExceptionHandler({PlateFoundException.class, UserVehicleFoundException.class, BookingFoundException.class})
+  @ExceptionHandler({ PlateFoundException.class, UserVehicleFoundException.class, BookingFoundException.class })
   public ResponseEntity<String> handleCustomExceptions(RuntimeException e) {
     return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
   }
 
   @ExceptionHandler(EntityNotFoundException.class)
   public ResponseEntity<String> handleEntityNotFoundException(EntityNotFoundException e) {
+    return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+  }
+
+  @ExceptionHandler(NoResourceFoundException.class)
+  public ResponseEntity<String> handleNoResourceFound(NoResourceFoundException e) {
     return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
   }
 

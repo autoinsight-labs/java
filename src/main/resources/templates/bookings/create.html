@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nova Reserva - AutoInsight - AutoInsight</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div th:replace="~{fragments/header :: header}"></div>
+    
+    <main class="container my-4">
+        <!-- Mensagens de sucesso/erro -->
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle me-2"></i>
+            <span th:text="${successMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i>
+            <span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        
+        <div class="fade-in">
+<div layout:fragment="content" class="fade-in">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="card shadow-custom">
+                    <div class="card-header">
+                        <h4 class="mb-0">
+                            <i class="fas fa-calendar-plus me-2"></i>Nova Reserva
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <form th:action="@{/view/bookings}" 
+                              th:object="${bookingRequest}" 
+                              method="post" 
+                              class="needs-validation" 
+                              novalidate>
+                            
+                            <div class="mb-3">
+                                <label for="vehicleId" class="form-label">ID do Veículo *</label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="vehicleId" 
+                                       th:field="*{vehicleId}" 
+                                       placeholder="ID do veículo (24 caracteres)"
+                                       pattern="^[a-z0-9]{24}$"
+                                       maxlength="24"
+                                       minlength="24"
+                                       required>
+                                <div class="form-text">
+                                    ID do veículo para a reserva (formato CUID2 - 24 caracteres).
+                                </div>
+                                <div class="invalid-feedback">
+                                    Por favor, informe um ID de veículo válido (24 caracteres).
+                                </div>
+                                <div th:if="${#fields.hasErrors('vehicleId')}" 
+                                     class="text-danger small mt-1">
+                                    <span th:errors="*{vehicleId}"></span>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="yardId" class="form-label">ID do Pátio *</label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="yardId" 
+                                       th:field="*{yardId}" 
+                                       placeholder="ID do pátio (24 caracteres)"
+                                       pattern="^[a-z0-9]{24}$"
+                                       maxlength="24"
+                                       minlength="24"
+                                       required>
+                                <div class="form-text">
+                                    ID do pátio onde será realizada a reserva (formato CUID2 - 24 caracteres).
+                                </div>
+                                <div class="invalid-feedback">
+                                    Por favor, informe um ID de pátio válido (24 caracteres).
+                                </div>
+                                <div th:if="${#fields.hasErrors('yardId')}" 
+                                     class="text-danger small mt-1">
+                                    <span th:errors="*{yardId}"></span>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="occursAt" class="form-label">Data e Hora da Reserva *</label>
+                                <input type="datetime-local" 
+                                       class="form-control" 
+                                       id="occursAt" 
+                                       th:field="*{occursAt}" 
+                                       required>
+                                <div class="form-text">
+                                    Data e hora futura para a reserva.
+                                </div>
+                                <div class="invalid-feedback">
+                                    Por favor, selecione uma data e hora futura.
+                                </div>
+                                <div th:if="${#fields.hasErrors('occursAt')}" 
+                                     class="text-danger small mt-1">
+                                    <span th:errors="*{occursAt}"></span>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="cancelledAt" class="form-label">Data de Cancelamento</label>
+                                <input type="datetime-local" 
+                                       class="form-control" 
+                                       id="cancelledAt" 
+                                       th:field="*{cancelledAt}">
+                                <div class="form-text">
+                                    Opcional. Data e hora do cancelamento da reserva.
+                                </div>
+                                <div th:if="${#fields.hasErrors('cancelledAt')}" 
+                                     class="text-danger small mt-1">
+                                    <span th:errors="*{cancelledAt}"></span>
+                                </div>
+                            </div>
+
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <a th:href="@{/view/bookings}" class="btn btn-secondary me-md-2">
+                                    <i class="fas fa-arrow-left me-2"></i>Cancelar
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>Criar Reserva
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Definir data mínima como hoje
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            
+            const minDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+            document.getElementById('occursAt').min = minDateTime;
+        });
+    </script>
+        </div>
+    </main>
+    
+    <div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

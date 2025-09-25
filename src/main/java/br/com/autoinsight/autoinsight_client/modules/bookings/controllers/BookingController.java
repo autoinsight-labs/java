@@ -29,7 +29,7 @@ import br.com.autoinsight.autoinsight_client.modules.bookings.useCases.UpdateBoo
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/bookings")
+@RequestMapping("/api/bookings")
 public class BookingController {
 
   @Autowired

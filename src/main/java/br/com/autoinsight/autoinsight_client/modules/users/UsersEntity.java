@@ -42,18 +42,27 @@ public class UsersEntity implements UserDetails {
   @Size(max = 100, message = "Password must not exceed 100 characters")
   private String password;
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "role_id", nullable = true)
   private RoleEntity role;
 
   @Override
   public Collection<? extends GrantedAuthority> getAuthorities() {
+    if (role != null && role.getAcronym() != null) {
+      return List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority(
+          "ROLE_" + role.getAcronym().toUpperCase()));
+    }
     return List.of();
   }
 
   @Override
   public String getUsername() {
     return email;
+  }
+
+  @Override
+  public String getPassword() {
+    return password;
   }
 
   @Override

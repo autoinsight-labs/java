@@ -28,7 +28,7 @@ import br.com.autoinsight.autoinsight_client.modules.vehicles.useCases.VehicleCa
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/vehicles")
+@RequestMapping("/api/vehicles")
 public class VehicleController {
 
   @Autowired

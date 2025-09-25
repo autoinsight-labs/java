@@ -2,6 +2,8 @@ package br.com.autoinsight.autoinsight_client.modules.bookings.dto;
 
 import java.time.LocalDateTime;
 
+import org.springframework.format.annotation.DateTimeFormat;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import jakarta.validation.constraints.Future;
@@ -23,11 +25,13 @@ public class BookingDTO {
   private String yardId;
 
   @NotNull(message = "Occurs at is required")
-  @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+  @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
+  @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm")
   @Future(message = "Must be a future date")
   private LocalDateTime occursAt;
-  
-  @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+
+  @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
+  @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm")
   @PastOrPresent(message = "Must be a past or present date")
   private LocalDateTime cancelledAt;
 }
