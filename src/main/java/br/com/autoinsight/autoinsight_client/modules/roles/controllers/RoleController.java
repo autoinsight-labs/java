@@ -25,7 +25,7 @@ import br.com.autoinsight.autoinsight_client.modules.roles.useCases.UpdateRoleUs
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/roles")
+@RequestMapping("/api/roles")
 public class RoleController {
 
   @Autowired
