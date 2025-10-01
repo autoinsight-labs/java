@@ -36,6 +36,19 @@ public class SecurityConfig {
   }
 
   @Bean
+  @Order(0)
+  public SecurityFilterChain swaggerSecurityFilterChain(HttpSecurity http) throws Exception {
+    http
+        .securityMatcher("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui",
+            "/swagger-resources/**", "/webjars/**")
+        .csrf(csrf -> csrf.disable())
+        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .authorizeHttpRequests(authz -> authz.anyRequest().permitAll());
+
+    return http.build();
+  }
+
+  @Bean
   @Order(1)
   public SecurityFilterChain apiSecurityFilterChain(HttpSecurity http) throws Exception {
     http
@@ -68,11 +81,15 @@ public class SecurityConfig {
   @Order(2)
   public SecurityFilterChain webSecurityFilterChain(HttpSecurity http) throws Exception {
     http
-        .securityMatcher("/**")
+        .securityMatcher(request -> !request.getServletPath().startsWith("/api/") &&
+            !request.getServletPath().startsWith("/swagger-ui") &&
+            !request.getServletPath().startsWith("/v3/api-docs") &&
+            !request.getServletPath().startsWith("/webjars/") &&
+            !request.getServletPath().startsWith("/swagger-resources/"))
         .csrf(csrf -> csrf.disable())
         .authorizeHttpRequests(authz -> authz
             .requestMatchers("/login", "/error/**").permitAll()
-            .requestMatchers("/", "/css/**", "/js/**", "/images/**").permitAll()
+            .requestMatchers("/", "/css/**", "/js/**", "/images/**", "/favicon.svg").permitAll()
             .requestMatchers("/view/roles/**").hasRole("ADM")
             .requestMatchers("/view/**").authenticated()
             .anyRequest().authenticated())
