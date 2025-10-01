@@ -4,6 +4,10 @@
 
 A **AutoInsight API** é uma aplicação Spring Boot que expõe APIs RESTful para gestão de usuários, papéis, veículos e reservas (bookings), além de telas web (Thymeleaf) para operações manuais. O projeto utiliza Oracle Database, migrações Flyway, autenticação via JWT, cache e paginação.
 
+## 🎥 Vídeo Demonstrativo
+
+Assista ao vídeo demonstrativo da solução: [AutoInsight - Demonstração](https://youtu.be/8q-QXujG43I)
+
 ## 👥 Equipe de Desenvolvimento
 
 | Nome | RM | E-mail | GitHub | LinkedIn |
@@ -16,15 +20,17 @@ A **AutoInsight API** é uma aplicação Spring Boot que expõe APIs RESTful par
 
 - **Java 17**, **Spring Boot 3.4.5**
 - **Spring Web**, **Spring Data JPA** (Oracle)
-- **Spring Security** com **JWT**
+- **Spring Security** com **JWT** (jjwt 0.12.3)
 - **Bean Validation (Jakarta)**
 - **Thymeleaf** (camada web)
 - **Flyway** para migrações (`src/main/resources/db/migration`)
 - **Spring Cache** e paginação do Spring Data
 - **Lombok 1.18.38**
-- **CUID 2.0.3** (IDs)
+- **CUID 2.0.3** (IDs únicos)
 - **spring-dotenv 4.0.0** (variáveis de ambiente)
-- **OpenAPI/Swagger** via `springdoc-openapi`
+- **OpenAPI/Swagger** via `springdoc-openapi 2.8.6`
+- **Oracle JDBC Driver 19.8.0.0**
+- **BCrypt** para hash de senhas
 
 ## 📦 Estrutura do Projeto
 
@@ -38,14 +44,25 @@ A **AutoInsight API** é uma aplicação Spring Boot que expõe APIs RESTful par
 
 ## 🔐 Segurança e Autenticação
 
-- APIs REST sob `/api/**` são protegidas por JWT.
-- Endpoints públicos:
-  - `/api/auth/**` (ex.: `POST /api/auth/login`)
-  - `/api/users/register`
-- Rotas Web (Thymeleaf):
-  - Livre: `/`, `/login`, assets (`/css/**`, `/js/**`)
-  - Protegido: `/view/**` (com exceção de `/view/roles/**` que exige `ROLE_ADM`)
-- Após autenticar, enviar o header: `Authorization: Bearer <token>`.
+O projeto utiliza **duas configurações de segurança separadas**:
+
+### APIs REST (`/api/**`)
+- Protegidas por **JWT Bearer Token**
+- **Endpoints públicos:**
+  - `/api/auth/**` (login e autenticação)
+  - `/api/users/register` (registro de usuários)
+- **Endpoints protegidos:**
+  - `/api/roles/**` → Requer `ROLE_ADM`
+  - Demais endpoints → Requer autenticação
+- **Header obrigatório:** `Authorization: Bearer <token>`
+
+### Interface Web (Thymeleaf)
+- Autenticação via **formulário de login**
+- **Rotas livres:** `/`, `/login`
+- **Rotas protegidas:**
+  - `/view/**` → Requer autenticação
+  - `/view/roles/**` → Requer `ROLE_ADM`
+- **Sessões:** Gerenciadas pelo Spring Security
 
 ## 📜 Documentação da API (Swagger)
 
@@ -54,13 +71,19 @@ A **AutoInsight API** é uma aplicação Spring Boot que expõe APIs RESTful par
 
 ## 🗄️ Banco de Dados e Migrações
 
-- Banco: Oracle (dialeto `org.hibernate.dialect.OracleDialect`)
-- DDL gerenciado por Flyway (Spring JPA `ddl-auto=none`)
-- Migrações em `classpath:db/migration`:
-  - `V1__Drop_all_tables.sql`
-  - `V2__Create_all_tables.sql`
-  - `V3__Insert_initial_data.sql`
-  - `V4__Create_indexes.sql`
+- **Banco:** Oracle Database (dialeto `org.hibernate.dialect.OracleDialect`)
+- **DDL:** Gerenciado exclusivamente pelo Flyway (`spring.jpa.hibernate.ddl-auto=none`)
+- **Migrações** em `src/main/resources/db/migration`:
+  - `V1__Drop_all_tables.sql` — Remove tabelas existentes
+  - `V2__Create_all_tables.sql` — Cria estrutura das tabelas
+  - `V3__Insert_initial_data.sql` — Dados iniciais (roles, usuários)
+  - `V4__Create_indexes.sql` — Índices para performance
+
+### Entidades Principais
+- **UsersEntity** — Usuários do sistema
+- **RoleEntity** — Papéis/permissões (USER, ADM)
+- **VehicleEntity** — Veículos com placas brasileiras
+- **BookingEntity** — Reservas de pátios com validação temporal
 
 ## ⚙️ Configuração
 
@@ -72,11 +95,6 @@ SPRING_DATASOURCE_USERNAME=<username>
 SPRING_DATASOURCE_PASSWORD=<password>
 SPRING_DATASOURCE_DRIVERCLASSNAME=oracle.jdbc.OracleDriver
 ```
-
-Principais propriedades (já referenciadas no `application.properties`):
-- `spring.flyway.enabled=true`
-- `spring.flyway.locations=classpath:db/migration`
-- `spring.jpa.hibernate.ddl-auto=none`
 
 ## 🚀 Como Executar Localmente
 
@@ -121,47 +139,69 @@ docker run --rm -p 8080:8080 \
   autoinsight-api
 ```
 
-## 🔑 Autenticação (Fluxo)
+## 🔑 Fluxo de Autenticação
 
-- Registrar usuário: `POST /api/users/register`
-- Login: `POST /api/auth/login` → retorna JWT
-- Usar JWT nas demais rotas `/api/**` via `Authorization: Bearer <token>`
+### Para APIs REST
+1. **Registrar usuário:** `POST /api/users/register`
+2. **Fazer login:** `POST /api/auth/login` → retorna JWT
+3. **Usar token:** Incluir `Authorization: Bearer <token>` nos headers
+4. **Verificar perfil:** `GET /api/auth/me` → dados do usuário autenticado
+
+### Para Interface Web
+1. **Acessar:** `http://localhost:8080/login`
+2. **Credenciais padrão:** Definidas em `V3__Insert_initial_data.sql`
+3. **Navegação:** Após login, acessar `/view/*` conforme permissões
 
 ## 📋 Endpoints Principais
 
-### Autenticação
+### 🔑 Autenticação (`/api/auth`)
 - `POST /api/auth/login` — autentica e retorna JWT
 - `GET /api/auth/me` — dados do usuário autenticado
 
-### Usuários
+### 👥 Usuários (`/api/users`)
 - `POST /api/users/register` — cria usuário (público)
+- `GET /api/users` — lista paginada (autenticado)
 - `GET /api/users/{id}` — obter por ID
 - `PUT /api/users/{id}` — atualizar
 - `DELETE /api/users/{id}` — excluir
 
-### Papéis (roles) [requer `ROLE_ADM`]
-- `GET /api/roles/`
-- `GET /api/roles/{id}`
-- `POST /api/roles/`
-- `PUT /api/roles/{id}`
-- `DELETE /api/roles/{id}`
+### 🎭 Papéis (`/api/roles`) [requer `ROLE_ADM`]
+- `GET /api/roles` — lista paginada
+- `GET /api/roles/{id}` — obter por ID
+- `POST /api/roles` — criar papel
+- `PUT /api/roles/{id}` — atualizar
+- `DELETE /api/roles/{id}` — excluir
 
-### Veículos
-- `GET /api/vehicles/` — lista paginada
-- `GET /api/vehicles/{id}`
-- `GET /api/vehicles/user/{userId}`
-- `POST /api/vehicles/`
-- `PUT /api/vehicles/{id}`
-- `DELETE /api/vehicles/{id}`
+### 🚗 Veículos (`/api/vehicles`)
+- `GET /api/vehicles` — lista paginada
+- `GET /api/vehicles/{id}` — obter por ID
+- `GET /api/vehicles/user/{userId}` — veículo do usuário
+- `POST /api/vehicles` — criar veículo
+- `PUT /api/vehicles/{id}` — atualizar
+- `DELETE /api/vehicles/{id}` — excluir
 
-### Reservas (bookings)
-- `GET /api/bookings/` — lista paginada (ordenada por `occursAt` desc.)
-- `GET /api/bookings/{id}`
-- `GET /api/bookings/yard/{yardId}` — paginado
-- `GET /api/bookings/vehicle/{vehicleId}` — paginado
-- `POST /api/bookings/`
-- `PUT /api/bookings/{id}`
-- `DELETE /api/bookings/{id}`
+### 📅 Reservas (`/api/bookings`)
+- `GET /api/bookings` — lista paginada (ordenada por `occursAt` desc.)
+- `GET /api/bookings/{id}` — obter por ID
+- `GET /api/bookings/yard/{yardId}` — reservas por pátio (paginado)
+- `GET /api/bookings/vehicle/{vehicleId}` — reservas por veículo (paginado)
+- `POST /api/bookings` — criar reserva
+- `PUT /api/bookings/{id}` — atualizar
+- `DELETE /api/bookings/{id}` — excluir
+
+## 🌐 Interface Web (Thymeleaf)
+
+### Rotas de Visualização
+- `/` — página inicial
+- `/login` — formulário de login
+
+### Gestão via Interface Web (`/view/*`)
+- `/view/users` — gerenciar usuários
+- `/view/vehicles` — gerenciar veículos  
+- `/view/bookings` — gerenciar reservas
+- `/view/roles` — gerenciar papéis (apenas `ROLE_ADM`)
+
+Cada módulo possui páginas para **listar**, **criar** e **editar** registros.
 
 ## 📄 Licença
 
