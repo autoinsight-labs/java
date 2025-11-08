@@ -10,11 +10,11 @@ Assista ao vídeo demonstrativo da solução: [AutoInsight - Demonstração](htt
 
 ## 👥 Equipe de Desenvolvimento
 
-| Nome | RM | E-mail | GitHub | LinkedIn |
-|------|-------|---------|---------|----------|
-| Arthur Vieira Mariano | RM554742 | arthvm@proton.me | [@arthvm](https://github.com/arthvm) | [arthvm](https://linkedin.com/in/arthvm/) |
-| Guilherme Henrique Maggiorini | RM554745 | guimaggiorini@gmail.com | [@guimaggiorini](https://github.com/guimaggiorini) | [guimaggiorini](https://linkedin.com/in/guimaggiorini/) |
-| Ian Rossato Braga | RM554989 | ian007953@gmail.com | [@iannrb](https://github.com/iannrb) | [ianrossato](https://linkedin.com/in/ianrossato/) |
+| Nome                        | RM      | Turma    | E-mail                 | GitHub                                         | LinkedIn                                   |
+|-----------------------------|---------|----------|------------------------|------------------------------------------------|--------------------------------------------|
+| Arthur Vieira Mariano       | RM554742| 2TDSPF   | arthvm@proton.me       | [@arthvm](https://github.com/arthvm)           | [arthvm](https://linkedin.com/in/arthvm/)  |
+| Guilherme Henrique Maggiorini| RM554745| 2TDSPF  | guimaggiorini@gmail.com| [@guimaggiorini](https://github.com/guimaggiorini) | [guimaggiorini](https://linkedin.com/in/guimaggiorini/) |
+| Ian Rossato Braga           | RM554989| 2TDSPY   | ian007953@gmail.com    | [@iannrb](https://github.com/iannrb)           | [ianrossato](https://linkedin.com/in/ianrossato/)      |
 
 ## 🛠️ Tecnologias Utilizadas
 
