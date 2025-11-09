@@ -37,6 +37,18 @@ public class SecurityConfig {
 
   @Bean
   @Order(0)
+  public SecurityFilterChain actuatorSecurityFilterChain(HttpSecurity http) throws Exception {
+    http
+        .securityMatcher("/actuator/**")
+        .csrf(csrf -> csrf.disable())
+        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .authorizeHttpRequests(authz -> authz.anyRequest().permitAll());
+
+    return http.build();
+  }
+
+  @Bean
+  @Order(1)
   public SecurityFilterChain swaggerSecurityFilterChain(HttpSecurity http) throws Exception {
     http
         .securityMatcher("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui",
@@ -49,7 +61,7 @@ public class SecurityConfig {
   }
 
   @Bean
-  @Order(1)
+  @Order(2)
   public SecurityFilterChain apiSecurityFilterChain(HttpSecurity http) throws Exception {
     http
         .securityMatcher("/api/**")
@@ -78,14 +90,15 @@ public class SecurityConfig {
   }
 
   @Bean
-  @Order(2)
+  @Order(3)
   public SecurityFilterChain webSecurityFilterChain(HttpSecurity http) throws Exception {
     http
         .securityMatcher(request -> !request.getServletPath().startsWith("/api/") &&
             !request.getServletPath().startsWith("/swagger-ui") &&
             !request.getServletPath().startsWith("/v3/api-docs") &&
             !request.getServletPath().startsWith("/webjars/") &&
-            !request.getServletPath().startsWith("/swagger-resources/"))
+            !request.getServletPath().startsWith("/swagger-resources/") &&
+            !request.getServletPath().startsWith("/actuator/"))
         .csrf(csrf -> csrf.disable())
         .authorizeHttpRequests(authz -> authz
             .requestMatchers("/login", "/error/**").permitAll()
