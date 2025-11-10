@@ -6,7 +6,7 @@ A **AutoInsight API** é uma aplicação Spring Boot que expõe APIs RESTful par
 
 ## 🎥 Vídeo Demonstrativo
 
-Assista ao vídeo demonstrativo da solução: [AutoInsight - Demonstração](https://youtu.be/8q-QXujG43I)
+Assista ao vídeo demonstrativo da solução: [AutoInsight - Demonstração](https://youtu.be/t6mapOdIwGk)
 
 ## 👥 Equipe de Desenvolvimento
 
